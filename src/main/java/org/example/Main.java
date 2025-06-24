@@ -1,7 +1,9 @@
 package org.example;
+import org.example.Exercicio002.TExercicio002;
+
 import java.util.*;
 import java.util.Scanner;
-import static org.example.TExercicio001.AnagramGeneratorTest.runAllTests;
+import static org.example.Exercicio001.TExercicio001.AnagramGeneratorTest.runAllTests;
 
 public class Main {
     public static void main(String[] args) {

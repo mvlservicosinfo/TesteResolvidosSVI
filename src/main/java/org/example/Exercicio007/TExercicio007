@@ -1,0 +1,203 @@
+# Exercício 7 - Sistema XYZ - Gerenciamento de Plantas
+
+## 1. Use Case / User Story
+
+### User Story Principal
+**Como** um usuário do sistema XYZ
+**Eu quero** gerenciar informações de plantas (criar, atualizar, excluir e pesquisar)
+**Para que** eu possa manter um cadastro organizado de plantas que servirá como entrada para a segunda fase do projeto.
+
+### Use Cases Detalhados
+
+#### UC001 - Criar Planta
+- **Ator Principal:** Usuário autenticado
+- **Pré-condições:** Usuário logado no sistema
+- **Fluxo Principal:**
+  1. Usuário acessa a funcionalidade de cadastro de plantas
+  2. Sistema apresenta formulário com campos: Código e Descrição
+  3. Usuário preenche os dados obrigatórios (Código)
+  4. Sistema valida unicidade do código
+  5. Sistema salva a planta
+  6. Sistema exibe mensagem de sucesso
+
+#### UC002 - Atualizar Planta
+- **Ator Principal:** Usuário autenticado
+- **Pré-condições:** Planta existe no sistema
+- **Fluxo Principal:**
+  1. Usuário busca e seleciona uma planta existente
+  2. Sistema apresenta formulário preenchido
+  3. Usuário modifica os dados desejados
+  4. Sistema valida as alterações
+  5. Sistema atualiza a planta
+  6. Sistema exibe mensagem de sucesso
+
+#### UC003 - Excluir Planta
+- **Ator Principal:** Usuário administrador
+- **Pré-condições:**
+  - Usuário possui perfil de administrador
+  - Planta existe no sistema
+- **Fluxo Principal:**
+  1. Usuário administrador seleciona planta para exclusão
+  2. Sistema solicita confirmação
+  3. Usuário confirma a exclusão
+  4. Sistema remove a planta
+  5. Sistema exibe mensagem de sucesso
+
+#### UC004 - Pesquisar Plantas
+- **Ator Principal:** Usuário autenticado
+- **Pré-condições:** Usuário logado no sistema
+- **Fluxo Principal:**
+  1. Usuário acessa funcionalidade de pesquisa
+  2. Sistema apresenta opções de filtro (código, descrição)
+  3. Usuário define critérios de busca
+  4. Sistema retorna lista de plantas que atendem aos critérios
+  5. Usuário visualiza resultados
+
+## 2. Regras de Negócio e Premissas
+
+### Regras de Negócio
+- **RN001:** O código da planta deve ser numérico, obrigatório e único no sistema
+- **RN002:** A descrição pode conter caracteres alfanuméricos, ter até 10 caracteres e é opcional
+- **RN003:** Apenas usuários com perfil de administrador podem excluir plantas
+- **RN004:** O sistema deve prevenir duplicação de códigos de plantas
+- **RN005:** Todas as operações devem ser auditadas para rastreabilidade
+
+### Premissas
+- **P001:** O sistema possui controle de autenticação e autorização implementado
+- **P002:** Existe diferenciação entre usuários comuns e administradores
+- **P003:** O banco de dados suporta constraints de unicidade
+- **P004:** A interface será web-based
+- **P005:** Os dados das plantas serão utilizados na segunda fase do projeto
+
+## 3. Validações e Medidas de Segurança
+
+### Validações de Dados
+- **Código da Planta:**
+  - Deve ser numérico
+  - Não pode ser vazio/nulo
+  - Deve ser único no sistema
+  - Validação no front-end e back-end
+
+- **Descrição da Planta:**
+  - Máximo 10 caracteres
+  - Pode conter letras e números
+  - Campo opcional
+
+### Medidas de Segurança
+- **Autenticação:** Verificar se o usuário está logado antes de permitir qualquer operação
+- **Autorização:** Validar perfil do usuário para operações de exclusão
+- **Validação de Entrada:** Sanitizar todos os dados de entrada para prevenir injection attacks
+- **Auditoria:** Registrar todas as operações (criar, atualizar, excluir) com timestamp e usuário
+- **Rate Limiting:** Implementar controle de taxa para prevenir abuso
+- **CSRF Protection:** Implementar tokens CSRF em formulários
+- **Validação Dupla:** Validar dados tanto no cliente quanto no servidor
+
+## 4. Estratégia de Testes
+
+### Tipos de Testes
+
+#### Testes Unitários
+- Validação de regras de negócio
+- Funções de validação de dados
+- Lógica de unicidade de códigos
+
+#### Testes de Integração
+- Integração com banco de dados
+- Operações CRUD completas
+- Validação de constraints
+
+#### Testes End-to-End
+- Fluxos completos de usuário
+- Testes de interface
+- Cenários de diferentes perfis de usuário
+
+### Cenários de Teste
+
+#### Cenários Principais
+1. **Criar planta com dados válidos**
+2. **Atualizar planta existente**
+3. **Excluir planta como administrador**
+4. **Pesquisar plantas por código**
+5. **Pesquisar plantas por descrição**
+
+#### Casos Extremos (Edge Cases)
+
+##### EC001 - Código Duplicado
+- **Cenário:** Tentar criar planta com código já existente
+- **Resultado Esperado:** Sistema deve rejeitar e exibir mensagem de erro
+
+##### EC002 - Código Inválido
+- **Cenário:** Inserir código com caracteres não numéricos
+- **Resultado Esperado:** Sistema deve validar e exibir erro
+
+##### EC003 - Descrição Muito Longa
+- **Cenário:** Inserir descrição com mais de 10 caracteres
+- **Resultado Esperado:** Sistema deve truncar ou rejeitar
+
+##### EC004 - Exclusão por Usuário Comum
+- **Cenário:** Usuário não-admin tenta excluir planta
+- **Resultado Esperado:** Sistema deve negar acesso
+
+##### EC005 - Operações com Planta Inexistente
+- **Cenário:** Tentar atualizar/excluir planta que não existe
+- **Resultado Esperado:** Sistema deve retornar erro apropriado
+
+##### EC006 - Campos Vazios
+- **Cenário:** Submeter formulário sem preencher código obrigatório
+- **Resultado Esperado:** Sistema deve validar e exibir erro
+
+##### EC007 - Pesquisa Sem Resultados
+- **Cenário:** Pesquisar por critérios que não retornam resultados
+- **Resultado Esperado:** Sistema deve exibir mensagem apropriada
+
+##### EC008 - Concorrência
+- **Cenário:** Dois usuários tentam criar planta com mesmo código simultaneamente
+- **Resultado Esperado:** Apenas um deve ter sucesso
+
+### Exemplo de Caso de Teste
+
+```
+Caso de Teste: CT001 - Criar Planta com Sucesso
+
+Pré-condições:
+- Usuário autenticado no sistema
+- Código "12345" não existe no sistema
+
+Passos:
+1. Navegar para página de cadastro de plantas
+2. Preencher campo "Código" com "12345"
+3. Preencher campo "Descrição" com "Rosa Branca"
+4. Clicar no botão "Salvar"
+
+Resultado Esperado:
+- Planta deve ser criada com sucesso
+- Mensagem "Planta cadastrada com sucesso" deve ser exibida
+- Usuário deve ser redirecionado para lista de plantas
+- Nova planta deve aparecer na lista
+
+Critérios de Aceitação:
+- Código deve ser armazenado como numérico
+- Descrição deve ser armazenada corretamente
+- Registro deve ter timestamp de criação
+- Operação deve ser registrada no log de auditoria
+```
+
+## 5. Considerações Técnicas Adicionais
+
+### Arquitetura Sugerida
+- **Frontend:** Framework web moderno (React, Angular, Vue)
+- **Backend:** API REST com validações robustas
+- **Banco de Dados:** Constraints de unicidade e integridade referencial
+- **Segurança:** JWT para autenticação, RBAC para autorização
+
+### Monitoramento
+- Logs de aplicação para debugging
+- Métricas de performance
+- Alertas para tentativas de acesso não autorizado
+- Dashboard para acompanhamento de uso
+
+### Documentação
+- API documentation (Swagger/OpenAPI)
+- Manual do usuário
+- Guia de troubleshooting
+- Documentação técnica para desenvolvedores
