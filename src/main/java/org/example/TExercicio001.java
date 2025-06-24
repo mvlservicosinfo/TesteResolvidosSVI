@@ -3,145 +3,117 @@ package org.example;
 import java.util.*;
 
 public class TExercicio001 {
-         /**
-         * Gera todos os anagramas possíveis a partir de um conjunto de letras.
-         *
-         * @param letters String contendo as letras distintas para gerar anagramas
-         * @return Lista ordenada contendo todos os anagramas possíveis
-         * @throws IllegalArgumentException se a entrada for inválida
-         */
-        public static List<String> generateAnagrams(String letters) {
-            // Validação da entrada
-            validateInput(letters);
+    /**
+     * Gera todos os anagramas possíveis a partir de um conjunto de letras.
+     *
+     * @param letters String contendo as letras distintas para gerar anagramas
+     * @return Lista ordenada contendo todos os anagramas possíveis
+     * @throws IllegalArgumentException se a entrada for inválida
+     */
+    public static List<String> generateAnagrams(String letters) {
+        // Validação da entrada
+        validateInput(letters);
 
-            // Converte para array de caracteres para facilitar manipulação
-            char[] chars = letters.toLowerCase().toCharArray();
+        // Converte para array de caracteres para facilitar manipulação
+        char[] chars = letters.toLowerCase().toCharArray();
 
-            // Remove duplicatas (caso existam) e ordena para consistência
-            Set<Character> uniqueChars = new TreeSet<>();
-            for (char c : chars) {
-                uniqueChars.add(c);
-            }
-
-            // Converte de volta para array
-            char[] uniqueArray = new char[uniqueChars.size()];
-            int i = 0;
-            for (char c : uniqueChars) {
-                uniqueArray[i++] = c;
-            }
-
-            // Gera permutações usando algoritmo recursivo
-            List<String> anagrams = new ArrayList<>();
-            generatePermutations(uniqueArray, 0, anagrams);
-
-            // Ordena o resultado para saída consistente
-            Collections.sort(anagrams);
-
-            return anagrams;
+        // Remove duplicatas (caso existam) e ordena para consistência
+        Set<Character> uniqueChars = new TreeSet<>();
+        for (char c : chars) {
+            uniqueChars.add(c);
         }
 
-        /**
-         * Algoritmo recursivo para gerar todas as permutações possíveis.
-         *
-         * Utiliza a técnica de backtracking: para cada posição, tenta todos os
-         * caracteres disponíveis, faz a recursão, e depois desfaz a alteração.
-         *
-         * @param chars Array de caracteres a serem permutados
-         * @param startIndex Índice atual da recursão
-         * @param result Lista para armazenar os resultados
-         */
-        private static void generatePermutations(char[] chars, int startIndex, List<String> result) {
-            // Caso base: se chegou ao final, adiciona a permutação atual
-            if (startIndex == chars.length) {
-                result.add(new String(chars));
-                return;
-            }
-
-            // Para cada posição restante, tenta colocar cada caractere disponível
-            for (int i = startIndex; i < chars.length; i++) {
-                // Troca o caractere atual com o da posição i
-                swap(chars, startIndex, i);
-
-                // Recursão para as próximas posições
-                generatePermutations(chars, startIndex + 1, result);
-
-                // Backtrack: desfaz a troca para tentar próxima combinação
-                swap(chars, startIndex, i);
-            }
+        // Converte de volta para array
+        char[] uniqueArray = new char[uniqueChars.size()];
+        int i = 0;
+        for (char c : uniqueChars) {
+            uniqueArray[i++] = c;
         }
 
-        /**
-         * Troca dois elementos de posição no array.
-         *
-         * @param chars Array de caracteres
-         * @param i Primeira posição
-         * @param j Segunda posição
-         */
-        private static void swap(char[] chars, int i, int j) {
-            char temp = chars[i];
-            chars[i] = chars[j];
-            chars[j] = temp;
+        // Gera permutações usando algoritmo recursivo
+        List<String> anagrams = new ArrayList<>();
+        generatePermutations(uniqueArray, 0, anagrams);
+
+        // Ordena o resultado para saída consistente
+        Collections.sort(anagrams);
+
+        return anagrams;
+    }
+
+    /**
+     * @param chars      Array de caracteres a serem permutados
+     * @param startIndex Índice atual da recursão
+     * @param result     Lista para armazenar os resultados
+     */
+    private static void generatePermutations(char[] chars, int startIndex, List<String> result) {
+        // Caso base: se chegou ao final, adiciona a permutação atual
+        if (startIndex == chars.length) {
+            result.add(new String(chars));
+            return;
         }
 
-        /**
-         * Valida a entrada fornecida pelo usuário.
-         *
-         * @param input String de entrada a ser validada
-         * @throws IllegalArgumentException se a entrada for inválida
-         */
-        private static void validateInput(String input) {
-            if (input == null) {
-                throw new IllegalArgumentException("Entrada não pode ser nula");
-            }
+        // Para cada posição restante, tenta colocar cada caractere disponível
+        for (int i = startIndex; i < chars.length; i++) {
+            // Troca o caractere atual com o da posição i
+            swap(chars, startIndex, i);
 
-            if (input.trim().isEmpty()) {
-                throw new IllegalArgumentException("Entrada não pode estar vazia");
-            }
+            // Recursão para as próximas posições
+            generatePermutations(chars, startIndex + 1, result);
 
-            // Verifica se contém apenas letras
-            for (char c : input.toCharArray()) {
-                if (!Character.isLetter(c)) {
-                    throw new IllegalArgumentException("Entrada deve conter apenas letras. Caractere inválido: " + c);
-                }
-            }
+            // Backtrack: desfaz a troca para tentar próxima combinação
+            swap(chars, startIndex, i);
+        }
+    }
+
+    /**
+     * Troca dois elementos de posição no array.
+     *
+     * @param chars Array de caracteres
+     * @param i     Primeira posição
+     * @param j     Segunda posição
+     */
+    private static void swap(char[] chars, int i, int j) {
+        char temp = chars[i];
+        chars[i] = chars[j];
+        chars[j] = temp;
+    }
+
+    /**
+     * Valida a entrada fornecida pelo usuário.
+     *
+     * @param input String de entrada a ser validada
+     * @throws IllegalArgumentException se a entrada for inválida
+     */
+    private static void validateInput(String input) {
+        if (input == null) {
+            throw new IllegalArgumentException("Entrada não pode ser nula");
         }
 
-        /**
-         * Método utilitário para exibir os anagramas de forma formatada.
-         *
-         * @param letters Letras de entrada
-         * @param anagrams Lista de anagramas gerados
-         */
-        public static void displayAnagrams(String letters, List<String> anagrams) {
-            System.out.println("Anagramas para '" + letters + "':");
-            System.out.println("Total de combinações: " + anagrams.size());
-            System.out.println("Resultado: " + String.join(", ", anagrams));
-            System.out.println();
+        if (input.trim().isEmpty()) {
+            throw new IllegalArgumentException("Entrada não pode estar vazia");
         }
 
-        /**
-         * Método principal para demonstração da funcionalidade.
-         */
-        public static void main(String[] args) {
-            // Exemplos de uso
-            try {
-                // Exemplo básico do enunciado
-                List<String> result1 = generateAnagrams("abc");
-                displayAnagrams("abc", result1);
-
-                // Exemplo com 2 letras
-                List<String> result2 = generateAnagrams("xy");
-                displayAnagrams("xy", result2);
-
-                // Exemplo com 4 letras
-                List<String> result3 = generateAnagrams("word");
-                displayAnagrams("word", result3);
-
-            } catch (IllegalArgumentException e) {
-                System.err.println("Erro: " + e.getMessage());
+        // Verifica se contém apenas letras
+        for (char c : input.toCharArray()) {
+            if (!Character.isLetter(c)) {
+                throw new IllegalArgumentException("Entrada deve conter apenas letras. Caractere inválido: " + c);
             }
         }
     }
+
+    /**
+     * Método utilitário para exibir os anagramas de forma formatada.
+     *
+     * @param letters  Letras de entrada
+     * @param anagrams Lista de anagramas gerados
+     */
+    public static void displayAnagrams(String letters, List<String> anagrams) {
+        System.out.println("Anagramas para '" + letters + "':");
+        System.out.println("Total de combinações: " + anagrams.size());
+        System.out.println("Resultado: " + String.join(", ", anagrams));
+        System.out.println();
+    }
+
 
     /**
      * Classe de testes unitários para validar a funcionalidade do gerador de anagramas.
@@ -169,7 +141,7 @@ public class TExercicio001 {
          */
         public static void testSingleLetter() {
             System.out.println("=== Teste Letra Única ===");
-            List<String> result =  TExercicio001.generateAnagrams("a");
+            List<String> result = TExercicio001.generateAnagrams("a");
 
             assert result.size() == 1 : "Deveria ter 1 anagrama";
             assert result.get(0).equals("a") : "Único anagrama deveria ser 'a'";
@@ -271,4 +243,5 @@ public class TExercicio001 {
             }
         }
     }
+}
 
