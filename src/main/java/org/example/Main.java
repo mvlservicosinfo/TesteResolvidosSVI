@@ -6,7 +6,7 @@ import static org.example.TExercicio001.AnagramGeneratorTest.runAllTests;
 public class Main {
     public static void main(String[] args) {
 
-        System.out.println("Digite o item 1,2,3,4 para executar o Exercicios");
+        System.out.println("Digite o item 1 ou 2 para executar o Exercicios");
         Scanner item = new Scanner(System.in);
         Integer menuItem = item.nextInt();
 
@@ -57,7 +57,7 @@ public class Main {
                 System.out.println("Estoque do produto SKU001: " + inventory.get(searchProduct)); // 15
             }
             default:
-                System.out.println("Valor Incorreto! Escolha um valor entre 1 e 4");
+                System.out.println("Valor Incorreto! Escolha um valor entre 1 e 2");
 
         }
     }
