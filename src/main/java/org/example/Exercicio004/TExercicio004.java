@@ -7,7 +7,7 @@ public class TExercicio004 implements EmailService {
 
         private Session session;
 
-        public JavaMailEmailService() {
+        public void JavaMailEmailService() {
             // Configuração do JavaMail
             Properties props = new Properties();
             props.put("mail.smtp.host", "smtp.gmail.com");
@@ -18,7 +18,7 @@ public class TExercicio004 implements EmailService {
             this.session = Session.getInstance(props, new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication("user@gmail.com", "password");
+                    return new PasswordAuthentication("mvlservicosinfo@gmail.com", "1234");
                 }
             });
         }

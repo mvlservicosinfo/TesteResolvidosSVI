@@ -1,0 +1,304 @@
+# Exercício 3 - Experiência com Angular
+
+## Experiência com Angular e suas principais características
+
+Angular é um framework robusto para desenvolvimento de aplicações web single-page (SPA), desenvolvido pelo Google. Tenho experiência significativa com Angular em diversas versões, desde AngularJS até as versões mais recentes do Angular.
+
+### Core Features do Angular:
+
+1. **Component-Based Architecture**: Angular utiliza uma arquitetura baseada em componentes, onde cada componente encapsula HTML, CSS e lógica TypeScript.
+
+2. **Data Binding**: Oferece two-way data binding, property binding e event binding para sincronização entre template e componente.
+
+3. **Dependency Injection**: Sistema poderoso de injeção de dependências que facilita o gerenciamento de serviços e testabilidade.
+
+4. **Routing**: Sistema de roteamento avançado para navegação entre diferentes views/componentes.
+
+5. **Services**: Permite criação de serviços para compartilhar dados e lógica entre componentes.
+
+6. **Directives**: Diretivas estruturais (ngFor, ngIf) e de atributo para manipular o DOM.
+
+7. **Forms**: Suporte tanto para template-driven quanto reactive forms.
+
+8. **HTTP Client**: Cliente HTTP integrado para comunicação com APIs REST.
+
+### Casos de Uso:
+
+- **Enterprise Applications**: Ideal para aplicações corporativas complexas
+- **E-commerce Platforms**: Desenvolvimento de lojas virtuais com gerenciamento de estado complexo
+- **Dashboard e Analytics**: Criação de painéis administrativos com visualização de dados
+- **Progressive Web Apps (PWA)**: Desenvolvimento de aplicações web progressivas
+
+## Exemplo Prático: Sistema de Gerenciamento de Tarefas
+
+Desenvolvi um sistema de gerenciamento de tarefas corporativo onde utilizei Angular para criar uma interface robusta e responsiva. O sistema incluía:
+
+- Dashboard com estatísticas em tempo real
+- CRUD completo de tarefas
+- Sistema de notificações
+- Filtros avançados e paginação
+- Integração com API REST
+
+### Código de Demonstração: Comunicação entre Componentes
+
+#### 1. Serviço Compartilhado (task.service.ts)
+```typescript
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
+
+export interface Task {
+  id: number;
+  title: string;
+  description: string;
+  completed: boolean;
+  priority: 'low' | 'medium' | 'high';
+  dueDate: Date;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TaskService {
+  private apiUrl = 'https://api.example.com/tasks';
+  private tasksSubject = new BehaviorSubject<Task[]>([]);
+  public tasks$ = this.tasksSubject.asObservable();
+
+  constructor(private http: HttpClient) {
+    this.loadTasks();
+  }
+
+  // Carrega todas as tarefas
+  loadTasks(): void {
+    this.http.get<Task[]>(this.apiUrl).subscribe(
+      tasks => this.tasksSubject.next(tasks)
+    );
+  }
+
+  // Adiciona nova tarefa
+  addTask(task: Omit<Task, 'id'>): Observable<Task> {
+    return this.http.post<Task>(this.apiUrl, task);
+  }
+
+  // Atualiza tarefa existente
+  updateTask(id: number, task: Partial<Task>): Observable<Task> {
+    return this.http.put<Task>(`${this.apiUrl}/${id}`, task);
+  }
+
+  // Remove tarefa
+  deleteTask(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  // Notifica mudanças para todos os componentes inscritos
+  notifyTaskChange(): void {
+    this.loadTasks();
+  }
+}
+```
+
+#### 2. Componente Pai - Lista de Tarefas (task-list.component.ts)
+```typescript
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { TaskService, Task } from './task.service';
+
+@Component({
+  selector: 'app-task-list',
+  template: `
+    <div class="task-container">
+      <h2>Gerenciador de Tarefas</h2>
+
+      <!-- Componente filho para adicionar tarefas -->
+      <app-task-form
+        (taskAdded)="onTaskAdded($event)">
+      </app-task-form>
+
+      <!-- Lista de tarefas com comunicação via @Input e @Output -->
+      <div class="tasks-grid">
+        <app-task-item
+          *ngFor="let task of tasks; trackBy: trackByTaskId"
+          [task]="task"
+          (taskUpdated)="onTaskUpdated($event)"
+          (taskDeleted)="onTaskDeleted($event)">
+        </app-task-item>
+      </div>
+
+      <!-- Estatísticas -->
+      <app-task-stats
+        [totalTasks]="tasks.length"
+        [completedTasks]="getCompletedCount()">
+      </app-task-stats>
+    </div>
+  `,
+  styleUrls: ['./task-list.component.scss']
+})
+export class TaskListComponent implements OnInit, OnDestroy {
+  tasks: Task[] = [];
+  private destroy$ = new Subject<void>();
+
+  constructor(private taskService: TaskService) {}
+
+  ngOnInit(): void {
+    // Inscreve-se no observable de tarefas
+    this.taskService.tasks$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(tasks => {
+        this.tasks = tasks;
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // Callback quando nova tarefa é adicionada
+  onTaskAdded(task: Task): void {
+    this.taskService.notifyTaskChange();
+  }
+
+  // Callback quando tarefa é atualizada
+  onTaskUpdated(task: Task): void {
+    this.taskService.updateTask(task.id, task).subscribe(() => {
+      this.taskService.notifyTaskChange();
+    });
+  }
+
+  // Callback quando tarefa é deletada
+  onTaskDeleted(taskId: number): void {
+    this.taskService.deleteTask(taskId).subscribe(() => {
+      this.taskService.notifyTaskChange();
+    });
+  }
+
+  trackByTaskId(index: number, task: Task): number {
+    return task.id;
+  }
+
+  getCompletedCount(): number {
+    return this.tasks.filter(task => task.completed).length;
+  }
+}
+```
+
+#### 3. Componente Filho - Item de Tarefa (task-item.component.ts)
+```typescript
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Task } from './task.service';
+
+@Component({
+  selector: 'app-task-item',
+  template: `
+    <div class="task-card" [class.completed]="task.completed">
+      <div class="task-header">
+        <h3>{{ task.title }}</h3>
+        <span class="priority-badge" [class]="'priority-' + task.priority">
+          {{ task.priority | uppercase }}
+        </span>
+      </div>
+
+      <p class="task-description">{{ task.description }}</p>
+
+      <div class="task-actions">
+        <button
+          class="btn-toggle"
+          (click)="toggleCompleted()"
+          [class.completed]="task.completed">
+          {{ task.completed ? 'Marcar como Pendente' : 'Marcar como Concluída' }}
+        </button>
+
+        <button
+          class="btn-edit"
+          (click)="editMode = !editMode">
+          {{ editMode ? 'Cancelar' : 'Editar' }}
+        </button>
+
+        <button
+          class="btn-delete"
+          (click)="deleteTask()">
+          Excluir
+        </button>
+      </div>
+
+      <!-- Formulário de edição inline -->
+      <div *ngIf="editMode" class="edit-form">
+        <input
+          [(ngModel)]="editedTask.title"
+          placeholder="Título"
+          class="form-input">
+        <textarea
+          [(ngModel)]="editedTask.description"
+          placeholder="Descrição"
+          class="form-textarea">
+        </textarea>
+        <select [(ngModel)]="editedTask.priority" class="form-select">
+          <option value="low">Baixa</option>
+          <option value="medium">Média</option>
+          <option value="high">Alta</option>
+        </select>
+        <button (click)="saveChanges()" class="btn-save">Salvar</button>
+      </div>
+    </div>
+  `,
+  styleUrls: ['./task-item.component.scss']
+})
+export class TaskItemComponent {
+  @Input() task!: Task;
+  @Output() taskUpdated = new EventEmitter<Task>();
+  @Output() taskDeleted = new EventEmitter<number>();
+
+  editMode = false;
+  editedTask: Task = {} as Task;
+
+  ngOnInit(): void {
+    this.editedTask = { ...this.task };
+  }
+
+  toggleCompleted(): void {
+    const updatedTask = {
+      ...this.task,
+      completed: !this.task.completed
+    };
+    this.taskUpdated.emit(updatedTask);
+  }
+
+  saveChanges(): void {
+    this.taskUpdated.emit(this.editedTask);
+    this.editMode = false;
+  }
+
+  deleteTask(): void {
+    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+      this.taskDeleted.emit(this.task.id);
+    }
+  }
+}
+```
+
+### Características Técnicas Demonstradas:
+
+1. **Component Communication**:
+   - **@Input/@Output**: Comunicação entre componente pai e filho
+   - **Services com Observables**: Compartilhamento de estado global
+
+2. **Data Binding**:
+   - **Two-way binding**: `[(ngModel)]` para formulários
+   - **Property binding**: `[class]` para classes condicionais
+   - **Event binding**: `(click)` para eventos
+
+3. **Service Integration**:
+   - **HTTP Client**: Integração com API REST
+   - **BehaviorSubject**: Gerenciamento de estado reativo
+   - **Dependency Injection**: Injeção do serviço nos componentes
+
+### Vantagens desta Abordagem:
+
+- **Reusabilidade**: Componentes podem ser reutilizados em diferentes contextos
+- **Manutenibilidade**: Separação clara de responsabilidades
+- **Testabilidade**: Cada componente e serviço pode ser testado independentemente
+- **Performance**: TrackBy functions para otimização de rendering
+- **Reactive Programming**: Uso de Observables para gerenciamento de estado
+
+Este exemplo demonstra um padrão comum no Angular onde utilizamos serviços para gerenciar estado e comunicação com APIs, enquanto os componentes focam na apresentação e interação do usuário, mantendo uma arquitetura limpa e escalável.
