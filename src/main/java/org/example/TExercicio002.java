@@ -42,20 +42,11 @@ public class TExercicio002 {
             return Objects.equals(this.sku, outros.sku);
         }
 
-        /**
-         * Override do método hashCode() para manter consistência com equals()
-         *
-         * Regra fundamental: Se dois objetos são equals(),
-         * eles DEVEM ter o mesmo hashCode()
-         */
         @Override
         public int hashCode() {
             return Objects.hash(sku);
         }
 
-        /**
-         * Override do toString() para facilitar debug e logging
-         */
         @Override
         public String toString() {
             return String.format("Product{sku='%s', name='%s', price=%.2f, category='%s'}",
